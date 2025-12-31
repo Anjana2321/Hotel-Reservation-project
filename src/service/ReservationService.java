@@ -27,33 +27,32 @@ public class ReservationService {
         return roomStore.get(roomId);
     }
 
-    public Reservation reserveARoom(Customer customer, IRoom room, Date checkInDate, Date checkOutDate) {
+    public Reservation reserveARoom(Customer customer, IRoom room,
+                                    Date checkInDate, Date checkOutDate) {
 
-        for(Reservation reservation : reservationStore){
-            if(reservation.getRoom().equals(room)){
-                if(!(checkOutDate.before(reservation.getCheckInDate())||checkInDate.after(reservation.getCheckOutDate()))){
-    return null;
-                }
-            }
-        }
-        Reservation reservation= new Reservation(customer,room,checkInDate,checkOutDate);
+        Reservation reservation =
+                new Reservation(customer, room, checkInDate, checkOutDate);
+
         reservationStore.add(reservation);
         return reservation;
     }
 
+
     public Collection<IRoom> findRooms(Date checkInDate, Date checkOutDate) {
-        Collection<IRoom> availableRooms = new ArrayList<>(roomStore.values());
+        Collection<IRoom> availableRooms =
+                new ArrayList<>(roomStore.values());
 
         for (Reservation reservation : reservationStore) {
-            if(!(checkOutDate.before(reservation.getCheckInDate())||checkInDate.after(reservation.getCheckOutDate()))){
-    availableRooms.remove(reservation.getRoom());
+            if (datesOverlap(checkInDate, checkOutDate,
+                    reservation.getCheckInDate(),
+                    reservation.getCheckOutDate())) {
+
+                availableRooms.remove(reservation.getRoom());
             }
-        }
-        if(availableRooms.isEmpty()){
-            return findRecommendedRooms(checkInDate,checkOutDate);
         }
         return availableRooms;
     }
+
 
     void logReservationCount() {
         System.out.println("Total reservation:" + reservationStore.size());
